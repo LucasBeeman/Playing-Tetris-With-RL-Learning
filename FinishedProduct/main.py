@@ -10,6 +10,7 @@ import tensorflow as tf
 import multiprocessing
 import os 
 import time
+from model.model import TrainAndLoggingCallback
 
 # 1. Create the base environment
 env = gym_tetris.make('TetrisA-v3')
@@ -24,48 +25,47 @@ env = VecFrameStack(env, 4, channels_order='last')
 
 def run_action():
     done = True
-    for step in range(1000):
+    for step in range(100000):
         if done:
             env.reset()
         state, reward, done, info = env.step(env.action_space.sample())
         env.render()
     env.close()
 
-processes = []
+def print_help():
+    print('exit - saves the best model and ends the application\n'
+    'test - trains the NN model (will take a while)\n'
+    'run - runs the enviroment so that you can see the model in action\n\n')
 
-class TrainAndLoggingCallback(BaseCallback):
-
-    def __init__(self, check_freq, save_path, verbose=1):
-        super(TrainAndLoggingCallback, self).__init__(verbose)
-        self.check_freq = check_freq
-        self.save_path = save_path
-
-    def _init_callback(self):
-        if self.save_path is not None:
-            os.makedirs(self.save_path, exist_ok=True)
-
-    def _on_step(self):
-        if self.n_calls % self.check_freq == 0:
-            model_path = os.path.join(self.save_path, 'best_model_{}'.format(self.n_calls))
-            self.model.save(model_path)
-
-        return True
-
-CHECKPOINT_DIR = './train/'
-LOG_DIR = './logs/'
+CHECKPOINT_DIR = './model/modelLocation/train/'
+LOG_DIR = './model/modelLocation/logs/'
 
 callback = TrainAndLoggingCallback(check_freq=10000, save_path=CHECKPOINT_DIR)
 model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=LOG_DIR, learning_rate=0.000001, 
             n_steps=512) 
 
-model.learn(total_timesteps=1000000, callback=callback)
+def learn(num):
+    model.learn(total_timesteps=num , callback=callback)
 
-if __name__ == '__main__':
-    multiprocessing.freeze_support()
-    for _ in range(50):
-        p = multiprocessing.Process(target=model.learn, args=(1000000, callback))
-        p.start()
-    for process in processes:
-        p.join()
+def main():
+    while True:
+        answer = input("Enter your desired function, or type help for the description of each funciton: ")
+        if answer.strip().lower() == 'exit':
+            break
+        elif answer.strip().lower() == 'help':
+            print_help()
+        elif answer.strip().lower() == 'test':
+            num = input("Enter the ammount of run you wish to pass. The minimum is 10000: ")
+            try:
+                num = int(num)
+            except(TypeError):
+                print("Invalid input, number of runs will be 10000")
+                num = 10000
+            learn(num)
+        elif answer.strip().lower() == 'run':
+            run_action()
+        else:
+            print_help()
+main()
 
-model.save('thisisatestmodel')
+model.save('LatestModel')
