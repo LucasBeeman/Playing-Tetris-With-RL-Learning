@@ -1,3 +1,4 @@
+from argparse import Action
 import gym_tetris
 from nes_py.wrappers import JoypadSpace
 from gym_tetris.actions import SIMPLE_MOVEMENT
@@ -7,13 +8,10 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback
 from matplotlib import pyplot as plt
 import tensorflow as tf
-import multiprocessing
-import os 
-import time
 from model.model import TrainAndLoggingCallback
 
 # 1. Create the base environment
-env = gym_tetris.make('TetrisA-v3')
+env = gym_tetris.make('TetrisA-v0')
 # 2. Simplify the controls 
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 # 3. Grayscale
@@ -24,13 +22,17 @@ env = DummyVecEnv([lambda: env])
 env = VecFrameStack(env, 4, channels_order='last')
 
 def run_action():
-    done = True
-    for step in range(100000):
-        if done:
-            env.reset()
-        state, reward, done, info = env.step(env.action_space.sample())
+    model = PPO.load('./model/modelLocation/train/best_model_20000')
+    state = env.reset()
+    model.predict(state)
+    while True:
+        action, _state = model.predict(state)
+        state, reward, done, info = env.step(action)
         env.render()
-    env.close()
+        if done:
+            env.close()
+            exit()
+
 
 def print_help():
     print('exit - saves the best model and ends the application\n'
@@ -41,8 +43,9 @@ CHECKPOINT_DIR = './model/modelLocation/train/'
 LOG_DIR = './model/modelLocation/logs/'
 
 callback = TrainAndLoggingCallback(check_freq=10000, save_path=CHECKPOINT_DIR)
+
 model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=LOG_DIR, learning_rate=0.000001, 
-            n_steps=512) 
+           n_steps=512) 
 
 def learn(num):
     model.learn(total_timesteps=num , callback=callback)
@@ -58,8 +61,11 @@ def main():
             num = input("Enter the ammount of run you wish to pass. The minimum is 10000: ")
             try:
                 num = int(num)
-            except(TypeError):
+            except:
                 print("Invalid input, number of runs will be 10000")
+                num = 10000
+            if num < 10000:
+                print("input is too low, defaulting to 10000")
                 num = 10000
             learn(num)
         elif answer.strip().lower() == 'run':
@@ -67,5 +73,3 @@ def main():
         else:
             print_help()
 main()
-
-model.save('LatestModel')
