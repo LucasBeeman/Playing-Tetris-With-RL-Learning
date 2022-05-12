@@ -11,7 +11,7 @@ import tensorflow as tf
 from model.model import TrainAndLoggingCallback
 
 # 1. Create the base environment
-env = gym_tetris.make('TetrisA-v0')
+env = gym_tetris.make('TetrisA-v3')
 # 2. Simplify the controls 
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 # 3. Grayscale
@@ -22,7 +22,7 @@ env = DummyVecEnv([lambda: env])
 env = VecFrameStack(env, 4, channels_order='last')
 
 def run_action():
-    model = PPO.load('./model/modelLocation/train/best_model_20000')
+    model = PPO.load('./model/modelLocation/train/best_model_100000')
     state = env.reset()
     model.predict(state)
     while True:
