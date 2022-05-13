@@ -22,9 +22,8 @@ env = DummyVecEnv([lambda: env])
 env = VecFrameStack(env, 4, channels_order='last')
 
 def run_action():
-    model = PPO.load('./model/modelLocation/train/best_model_100000')
+    model = PPO.load('./model/modelLocation/train/best_model_10000')
     state = env.reset()
-    model.predict(state)
     while True:
         action, _state = model.predict(state)
         state, reward, done, info = env.step(action)
