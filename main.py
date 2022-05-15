@@ -24,6 +24,7 @@ env = DummyVecEnv([lambda: env])
 # 5. Stack the framesP
 env = VecFrameStack(env, 4, channels_order='last')
 
+#reads the current model to load the latest model
 with open('currentModel.txt', 'r') as f:
     current_model = f.read()
 
@@ -33,6 +34,7 @@ except:
     model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=LOG_DIR, learning_rate=0.000001, 
            n_steps=512) 
 
+#renders the enviroment that the NN trained in
 def run_action():
     with tf.device('/GPU:0'):
         state = env.reset()
@@ -51,11 +53,14 @@ def print_help():
     'test - trains the NN model (will take a while)\n'
     'run - runs the enviroment so that you can see the model in action\n\n')
 
+#calls the class to save and load the model every 10K tests
 callback = TrainAndLoggingCallback(check_freq=10000, save_path=CHECKPOINT_DIR)
 
+#helps the model learn at the most efficient pace
 def learn(num):
     with tf.device('/GPU:0'):
         model.learn(total_timesteps=num , callback=callback)
+        exit()
 
 def main():
     while True:
