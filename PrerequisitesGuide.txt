@@ -1,0 +1,12 @@
+Install anaconda
+Install Cuda
+Save these 2 to PATH
+[C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\bin
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.6\libnvvp]
+Install Cudnn
+Add the contents of each CUDNN folder into the repsective CUDA folder
+An example is copying The contents from the CUDNN/bin folder into the C:/ProgramFiles/Nvidia GPU Computing toolkit/CUDA/v11.6/bin folder
+Dont delete anything from the CUDA folder
+use the installPythonRequirements.bat file to install all python prerequisites
+Alternitively, you can anacondas base enviroment using "conda activate base" and then typing "pip install opencv-python tensorflow stable-baselines[mpi] nes-py gym gym-tetris"
+Run the program trough a conda interpreter. You can do this by going into the terminal and running the main python file

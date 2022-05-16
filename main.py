@@ -4,8 +4,6 @@ from gym_tetris.actions import SIMPLE_MOVEMENT
 from gym.wrappers import GrayScaleObservation
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import BaseCallback
-from matplotlib import pyplot as plt
 import tensorflow as tf
 from model.model import TrainAndLoggingCallback
 
@@ -28,6 +26,7 @@ env = VecFrameStack(env, 4, channels_order='last')
 with open('currentModel.txt', 'r') as f:
     current_model = f.read()
 
+#loads the model if it exists, elsewise, it creates a new model
 try:
     model = PPO.load('./model/modelLocation/train/{}', current_model)
 except:

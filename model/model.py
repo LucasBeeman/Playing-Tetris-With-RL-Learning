@@ -6,7 +6,11 @@ class TrainAndLoggingCallback(BaseCallback):
         super(TrainAndLoggingCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.save_path = save_path
+        #the n_calls are the steps of evoltion in the neural network
+        #This helps you start back up, instead of completely restarting the evolution process
         with open('currentModel.txt', 'r') as f:
+            #the steps are the number withing the 'current model.txt' file
+            #I couldn't properly read every number, so I forced an extra zero
             self.n_calls = int(f.read()[11: len(f.read()) - 1] + '0')
 
 #makes sure that the directories don't get recreated
